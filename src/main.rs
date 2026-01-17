@@ -204,18 +204,20 @@ impl App {
         if let Some(start) = self.start_time {
             let elapsed = start.elapsed().as_secs_f64();
             if elapsed > 0.0 {
-                let chars_typed = self.typed_text.len() as f64;
-                let words_typed = chars_typed / 5.0;
+                // Calculate accuracy by comparing typed chars to target chars directly
+                let correct_count = self.typed_text
+                    .chars()
+                    .zip(self.target_text.chars())
+                    .filter(|(typed, target)| typed == target)
+                    .count();
+
+                // WPM based on correct characters only (net WPM)
+                let correct_chars = correct_count as f64;
+                let words_typed = correct_chars / 5.0;
                 let minutes = elapsed / 60.0;
                 self.current_wpm = words_typed / minutes;
 
-                // Calculate accuracy by comparing typed chars to target chars directly
                 if !self.typed_text.is_empty() {
-                    let correct_count = self.typed_text
-                        .chars()
-                        .zip(self.target_text.chars())
-                        .filter(|(typed, target)| typed == target)
-                        .count();
                     self.current_accuracy = (correct_count as f64 / self.typed_text.len() as f64) * 100.0;
                 } else {
                     self.current_accuracy = 100.0;
